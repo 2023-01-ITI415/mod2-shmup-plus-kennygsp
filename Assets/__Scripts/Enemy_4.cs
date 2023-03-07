@@ -13,7 +13,6 @@ public class Enemy_4 : Enemy
     private Vector3 p0, p1; //points to move between
     private float timeStart; //Birth time for the object
 
-
     // Start is called before the first frame update
     void Start()
     {

@@ -5,6 +5,8 @@ using UnityEngine;
 public class Hero : MonoBehaviour {
     static public Hero S { get; private set; } // Singleton
 
+    public ScoreCounter scoreCounter;
+
     [Header("Inscribed")]
     // These fields control the movement of the ship
     public float speed = 30;
@@ -14,6 +16,11 @@ public class Hero : MonoBehaviour {
     public GameObject projectilePrefab;
     public float projectileSpeed = 40;
     public Weapon[] weapons;
+    public AudioSource audioSource;
+
+    //Variables needed to delay the sound being played
+    float timer = 0.0f;
+    bool soundPlayed = false;
 
     [Header("Dynamic")] [Range(0,4)]
     
@@ -26,6 +33,14 @@ public class Hero : MonoBehaviour {
     public delegate void WeaponFireDelegate();
     // Create a WeaponFireDelegate field named fireDelegate.
     public WeaponFireDelegate fireEvent;
+
+    void Start() {
+        //Find a GameObject named ScoreCounter in the Scene Hierarchy
+        GameObject scoreGO = GameObject.Find( "Score" );
+
+        //Get the ScoreCounter script component of scoreGO
+        scoreCounter = scoreGO.GetComponent<ScoreCounter>();
+    }
 
 	void Awake()
     {
@@ -60,12 +75,24 @@ public class Hero : MonoBehaviour {
         // Rotate the ship to make it feel more dynamic
         transform.rotation = Quaternion.Euler(yAxis * pitchMult, xAxis * rollMult, 0);
 
+        //increment timer
+        if (soundPlayed) {
+            timer += Time.deltaTime;
+        }
+
         // Use the fireDelegate to fire Weapons
         // First, make sure the button is pressed: Axis("Jump")
         // Then ensure that fireDelegate isn't null to avoid an error
         if (Input.GetAxis("Jump") == 1 && fireEvent != null)
         {
             fireEvent();
+
+            //if jump is pressed sound will play then it will wait to be played again
+            if (!soundPlayed || timer >= 0.25f){
+                audioSource.Play();
+                soundPlayed = true;
+                timer = 0.0f;
+            }
             //TempFire();
         }
     }

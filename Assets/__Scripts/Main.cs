@@ -5,6 +5,8 @@ using UnityEngine.SceneManagement;
 
 public class Main : MonoBehaviour {
 
+    public ScoreCounter scoreCounter;
+
     static public Main S; // A singleton for Main
     static Dictionary<eWeaponType, WeaponDefinition> WEAP_DICT;
 
@@ -14,6 +16,25 @@ public class Main : MonoBehaviour {
     public float enemySpawnPerSecond = 0.5f; // # Enemies/second
     public float enemyInsetDefault = 1.5f; // Padding for position
     public float gameRestartDelay = 2;
+    public float WaveRound = 0;
+
+    //Pause Menu
+    public static bool gameIsPaused;
+    public GameObject PauseMenu;
+    private bool waveTextActive = false;
+
+    int num = 0;
+
+    //Waves
+    public GameObject[] WavesText;
+    float timer = 0.0f;
+
+    // Enemy GameObjects
+    public GameObject enemy1;
+    public GameObject enemy2;
+    public GameObject enemy3;
+    public GameObject enemy4;
+
 
     public WeaponDefinition[] weaponDefinitions;
     public GameObject prefabPowerUp;
@@ -50,8 +71,95 @@ public class Main : MonoBehaviour {
         }
     }
 
+    void Start()
+    {
+
+        PauseMenu.SetActive(false);
+        Time.timeScale = 1;
+
+        GameObject scoreGO = GameObject.Find( "Score" );
+        scoreCounter = scoreGO.GetComponent<ScoreCounter>();
+
+        GameObject enemy1 = GameObject.Find("Enemy_1");
+        GameObject enemy2 = GameObject.Find("Enemy_2");
+        GameObject enemy3 = GameObject.Find("Enemy_3");
+        GameObject enemy4 = GameObject.Find("Enemy_4");
+        
+    }
+
+    void Update()
+    {
+        timer += Time.deltaTime;
+        Waves();
+
+        if(Input.GetKeyDown(KeyCode.Escape))
+        {
+            if(gameIsPaused)
+            {
+                ResumeGame();
+            }
+            else
+            {
+                PauseGame();
+            }
+        }      
+    }
+
+    public void Waves()
+    {
+
+        if ( waveTextActive && timer >= 2f)
+        {
+            WavesText[num].SetActive(false);
+            waveTextActive = false;
+            num += 1;
+        }
+
+        if ( scoreCounter.score >= 1000 && !waveTextActive && num <= 0)
+        {
+            waveTextActive = true;
+            WavesText[num].SetActive(true);
+            timer = 0.0f;
+            enemy1.SetActive(true);
+            
+        }
+
+        else if ( scoreCounter.score >= 2000 && !waveTextActive && num <= 1 )
+        {
+            waveTextActive = true;
+            WavesText[num].SetActive(true);
+            timer = 0.0f;
+            enemy2.SetActive(true);
+            
+        }
+
+        else if ( scoreCounter.score >= 3000 && !waveTextActive && num <= 2 )
+        {
+            waveTextActive = true;
+            WavesText[num].SetActive(true);
+            timer = 0.0f;
+            enemy3.SetActive(true);
+            
+        }
+
+        else if ( scoreCounter.score >= 4000 && !waveTextActive && num <= 3 )
+        {
+            waveTextActive = true;
+            WavesText[num].SetActive(true);
+            timer = 0.0f;
+            enemy4.SetActive(true);
+            
+        }
+
+    }
+
     private void Awake()
     {
+        enemy1.SetActive(false);
+        enemy2.SetActive(false);
+        enemy3.SetActive(false);
+        enemy4.SetActive(false);
+
         S = this;
         // Set bndCheck to reference the BoundsCheck component on this GameObject
         bndCheck = GetComponent<BoundsCheck>();
@@ -97,6 +205,7 @@ public class Main : MonoBehaviour {
 
         // Invoke SpawnEnemy() again
         Invoke(nameof(SpawnEnemy), 1f / enemySpawnPerSecond);
+
     }
 
     public void DelayedRestart()
@@ -116,6 +225,19 @@ public class Main : MonoBehaviour {
         S.DelayedRestart();
     }
 
+    public void PauseGame()
+    {
+        PauseMenu.SetActive(true);
+        Time.timeScale = 0f;
+        gameIsPaused = true;
+    }
+
+    public void ResumeGame()
+    {
+        PauseMenu.SetActive(false);
+        Time.timeScale = 1f;
+        gameIsPaused = false;
+    }
 
     ///<summary>
     ///Static function that gets a WeaponDefinition from the WEAP_DICT static

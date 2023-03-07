@@ -1,18 +1,21 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using System;
 
 [RequireComponent(typeof(BoundsCheck))]
 public class Enemy : MonoBehaviour
 {
+    public ScoreCounter scoreCounter;
 
     [Header("Inscribed: Enemy")]
     public float speed = 10f; // The speed in m/s
     public float fireRate = 0.3f; // Seconds/shot (Unused)
     public float health = 10;
-    public int score = 100; // Points earned for destroying this
     public float showDamageDuration = 0.1f; // # seconds to show damage
     public float powerUpDropChance = 1f; // Chance to drop a power-up
+    public GameObject[] prefabEnemies;
+
 
     [Header("Set Dynamically: Enemy")]
     public Color[] originalColors;
@@ -49,6 +52,14 @@ public class Enemy : MonoBehaviour
         }
     }
 
+    void Start() {
+        
+        //Find a GameObject named ScoreCounter in the Scene Hierarchy
+        GameObject scoreGO = GameObject.Find( "Score" );
+
+        //Get the ScoreCounter script component of scoreGO
+        scoreCounter = scoreGO.GetComponent<ScoreCounter>();
+    }
 
 
     void Update()
@@ -90,6 +101,40 @@ public class Enemy : MonoBehaviour
                     {
                         calledShipDestroyed = true;
                         Main.SHIP_DESTROYED(this);
+
+                        int prefabIndex = -1;
+                        for (int i = 0; i < prefabEnemies.Length; i++)
+                        {
+                            if (this.gameObject == prefabEnemies[i])
+                            {
+                                prefabIndex = i;
+                                break;
+                            }
+                        }
+
+                        switch (prefabIndex)
+                        {
+                            case 0:
+                                scoreCounter.score += 50;
+                                HighScore.TRY_SET_HIGH_SCORE(scoreCounter.score);
+                                break;
+                            case 1:
+                                scoreCounter.score += 100;
+                                HighScore.TRY_SET_HIGH_SCORE(scoreCounter.score);
+                                break;
+                            case 2:
+                                scoreCounter.score += 150;
+                                HighScore.TRY_SET_HIGH_SCORE(scoreCounter.score);
+                                break;
+                            case 3:
+                                scoreCounter.score += 200;
+                                  HighScore.TRY_SET_HIGH_SCORE(scoreCounter.score);
+                                break;
+                            case 4:
+                                scoreCounter.score += 300;
+                                HighScore.TRY_SET_HIGH_SCORE(scoreCounter.score);
+                                break;
+                        }
                     }
                     Destroy(this.gameObject);
                 }
@@ -103,4 +148,5 @@ public class Enemy : MonoBehaviour
             print("Enemy hit by non-ProjectileHero: " + otherGO.name);
         }
     }
+    
 }
